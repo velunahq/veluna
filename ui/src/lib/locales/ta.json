@@ -915,5 +915,11 @@
 		"offline_title": "இணைய இணைப்பு இல்லை",
 		"offline_body": "Veluna-ஆல் YouTube Music-ஐ அணுக முடியவில்லை. உங்கள் இணைய இணைப்பைச் சரிபார்த்துவிட்டு மீண்டும் முயற்சிக்கவும்.",
 		"generic_title": "ஏதோ தவறு நடந்துவிட்டது"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

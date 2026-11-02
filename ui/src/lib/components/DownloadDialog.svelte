@@ -15,18 +15,20 @@
 	import { t } from '$lib/i18n.svelte';
 	import { downloadManager, QUALITY_OPTIONS } from '$lib/download.svelte';
 
-	const track = $derived(downloadManager.dialogTrack);
+	const tracks = $derived(downloadManager.dialogTracks);
+	const isBatch = $derived(tracks.length > 1);
+	const track = $derived(tracks.length > 0 ? tracks[0] : null);
 
 	async function submit() {
-		if (!track) return;
-		const targetTrack = track;
+		if (!tracks.length) return;
+		const targetTracks = [...tracks];
 		const quality = downloadManager.selectedQuality;
 		downloadManager.closeDialog();
-		await downloadManager.downloadTrack(targetTrack, quality);
+		await downloadManager.downloadTracks(targetTracks, quality);
 	}
 </script>
 
-{#if downloadManager.dialogOpen && track}
+{#if downloadManager.dialogOpen && tracks.length > 0}
 	<!-- Backdrop -->
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 	<div
@@ -48,7 +50,13 @@
 			<div class="flex items-center justify-between border-b px-5 py-4">
 				<div class="flex items-center gap-2">
 					<HugeiconsIcon icon={Download01Icon} class="h-5 w-5 text-primary" />
-					<h2 class="text-base font-semibold">{t('download.title')}</h2>
+					<h2 class="text-base font-semibold">
+						{#if isBatch}
+							{t('download.batch_title', { count: tracks.length })}
+						{:else}
+							{t('download.title')}
+						{/if}
+					</h2>
 				</div>
 				<button
 					class="rounded-full p-1 text-muted-foreground hover:bg-accent/20 hover:text-foreground"
@@ -61,24 +69,38 @@
 
 			<!-- Track Overview -->
 			<div class="flex items-center gap-3 bg-muted/30 px-5 py-3">
-				{#if track.thumbnail}
-					<img
-						src={thumb(track.thumbnail, 96)}
-						alt=""
-						class="h-12 w-12 shrink-0 rounded-lg object-cover shadow-sm"
-					/>
-				{:else}
-					<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-						<HugeiconsIcon icon={MusicNote01Icon} class="h-6 w-6" />
+				{#if isBatch}
+					<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+						<HugeiconsIcon icon={Download01Icon} class="h-6 w-6" />
+					</div>
+					<div class="min-w-0 flex-1">
+						<p class="truncate font-medium text-sm text-foreground">
+							{t('download.batch_summary', { count: tracks.length })}
+						</p>
+						<p class="truncate text-xs text-muted-foreground">
+							{tracks.slice(0, 3).map((t) => t.title).join(', ')}{tracks.length > 3 ? '...' : ''}
+						</p>
+					</div>
+				{:else if track}
+					{#if track.thumbnail}
+						<img
+							src={thumb(track.thumbnail, 96)}
+							alt=""
+							class="h-12 w-12 shrink-0 rounded-lg object-cover shadow-sm"
+						/>
+					{:else}
+						<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+							<HugeiconsIcon icon={MusicNote01Icon} class="h-6 w-6" />
+						</div>
+					{/if}
+					<div class="min-w-0 flex-1">
+						<p class="truncate font-medium text-sm text-foreground">{track.title}</p>
+						<p class="truncate text-xs text-muted-foreground">{track.artists}</p>
+						{#if track.album}
+							<p class="truncate text-[11px] text-muted-foreground/70">{track.album}</p>
+						{/if}
 					</div>
 				{/if}
-				<div class="min-w-0 flex-1">
-					<p class="truncate font-medium text-sm text-foreground">{track.title}</p>
-					<p class="truncate text-xs text-muted-foreground">{track.artists}</p>
-					{#if track.album}
-						<p class="truncate text-[11px] text-muted-foreground/70">{track.album}</p>
-					{/if}
-				</div>
 			</div>
 
 			<!-- Quality Selector Body -->
@@ -185,7 +207,11 @@
 						</Button>
 						<Button size="sm" class="gap-1.5" onclick={submit}>
 							<HugeiconsIcon icon={Download01Icon} class="h-4 w-4" />
-							{t('download.start')}
+							{#if isBatch}
+								{t('download.start_batch', { count: tracks.length })}
+							{:else}
+								{t('download.start')}
+							{/if}
 						</Button>
 					</div>
 				</div>

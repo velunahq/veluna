@@ -1096,5 +1096,11 @@
 		"anyway_hint": "중복 곡도 추가",
 		"adds": "+{count}",
 		"anyway_hint_local": "중복 곡은 YouTube 재생목록에만 추가됩니다"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

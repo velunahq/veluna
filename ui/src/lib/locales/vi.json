@@ -1111,5 +1111,11 @@
 			"not_found": "Không tìm thấy trên YouTube Music.",
 			"cooldown": "YouTube Music yêu cầu Veluna giảm tần suất gửi yêu cầu, quá trình nhập tạm dừng đến {time}. Mọi bài đã tìm thấy đều được lưu lại."
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

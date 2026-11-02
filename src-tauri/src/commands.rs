@@ -2724,6 +2724,14 @@ pub async fn start_download(
 }
 
 #[tauri::command]
+pub async fn start_downloads_batch(
+    state: St<'_>,
+    requests: Vec<crate::downloader::DownloadRequest>,
+) -> Result<Vec<String>, String> {
+    state.downloader.start_batch(state.inner().clone(), requests).await
+}
+
+#[tauri::command]
 pub async fn cancel_download(state: St<'_>, id: String) -> Result<bool, String> {
     Ok(state.downloader.cancel(&id).await)
 }

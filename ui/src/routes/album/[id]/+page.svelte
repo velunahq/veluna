@@ -14,6 +14,7 @@
         Share08Icon,
         BookmarkAdd02Icon,
         BookmarkCheck02Icon,
+        Download01Icon,
     } from "@hugeicons/core-free-icons";
     import TrackRow from "$lib/components/TrackRow.svelte";
     import TrackColumns, { chosen } from "$lib/components/TrackColumns.svelte";
@@ -21,6 +22,7 @@
     import TrackSelectionBar from "$lib/components/TrackSelectionBar.svelte";
     import TrackSelectButton from "$lib/components/TrackSelectButton.svelte";
     import { trackSelection } from "$lib/selection.svelte";
+    import { downloadManager } from "$lib/download.svelte";
     import TrackFilter, {
         filterTracks,
     } from "$lib/components/TrackFilter.svelte";
@@ -462,6 +464,21 @@
                             /> {t("home.add_shortcut")}
                         </button>
                         {#if !isLocal}
+                            <button
+                                class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent/10"
+                                onclick={() => {
+                                    menuOpen = false;
+                                    const items = (album?.items ?? []).filter((s) => !api.isLocalId(s.video_id));
+                                    if (items.length) {
+                                        downloadManager.openDialog(items);
+                                    }
+                                }}
+                            >
+                                <HugeiconsIcon
+                                    icon={Download01Icon}
+                                    class="h-4 w-4"
+                                /> {t("download.button")}
+                            </button>
                             <button
                                 class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent/10"
                                 onclick={() => {

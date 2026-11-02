@@ -1192,5 +1192,11 @@
 			"not_found": "ไม่พบรายการนั้นบน YouTube Music",
 			"cooldown": "YouTube Music ขอให้ Veluna ช้าลง การนำเข้าจึงหยุดพักจนถึง {time} ทุกอย่างที่พบจนถึงตอนนี้ถูกบันทึกไว้แล้ว"
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

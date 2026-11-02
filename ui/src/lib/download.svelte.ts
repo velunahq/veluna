@@ -63,7 +63,7 @@ export const QUALITY_OPTIONS: QualityOption[] = [
 
 class DownloadStore {
 	items = $state<DownloadProgress[]>([]);
-	dialogTrack = $state<SongItem | null>(null);
+	dialogTracks = $state<SongItem[]>([]);
 	dialogOpen = $state(false);
 	selectedQuality = $state(
 		(typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_QUALITY_KEY)) || 'best_opus'
@@ -75,9 +75,17 @@ class DownloadStore {
 		(typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_DIR_KEY)) || ''
 	);
 
+	get dialogTrack(): SongItem | null {
+		return this.dialogTracks.length > 0 ? this.dialogTracks[0] : null;
+	}
+
 	get activeCount() {
 		return this.items.filter(
-			(d) => d.status === 'downloading' || d.status === 'transcoding' || d.status === 'tagging'
+			(d) =>
+				d.status === 'queued' ||
+				d.status === 'downloading' ||
+				d.status === 'transcoding' ||
+				d.status === 'tagging'
 		).length;
 	}
 
@@ -124,8 +132,8 @@ class DownloadStore {
 		});
 	}
 
-	async openDialog(track: SongItem) {
-		this.dialogTrack = track;
+	async openDialog(tracks: SongItem | SongItem[]) {
+		this.dialogTracks = Array.isArray(tracks) ? tracks : [tracks];
 		this.dialogOpen = true;
 		if (!this.downloadDir) {
 			try {
@@ -141,7 +149,7 @@ class DownloadStore {
 
 	closeDialog() {
 		this.dialogOpen = false;
-		this.dialogTrack = null;
+		this.dialogTracks = [];
 	}
 
 	async pickFolder(): Promise<string | null> {
@@ -164,7 +172,23 @@ class DownloadStore {
 		return null;
 	}
 
+	private parseDuration(duration?: string): number | undefined {
+		if (!duration) return undefined;
+		const parts = duration.split(':').map((p) => parseInt(p, 10));
+		if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+			return parts[0] * 60 + parts[1];
+		} else if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+			return parts[0] * 3600 + parts[1] * 60 + parts[2];
+		}
+		return undefined;
+	}
+
 	async downloadTrack(track: SongItem, quality?: string) {
+		await this.downloadTracks([track], quality);
+	}
+
+	async downloadTracks(tracks: SongItem[], quality?: string) {
+		if (!tracks.length) return;
 		const chosenQuality = quality || this.selectedQuality;
 		if (this.rememberChoice) {
 			localStorage.setItem(STORAGE_QUALITY_KEY, chosenQuality);
@@ -183,30 +207,25 @@ class DownloadStore {
 			}
 		}
 
-		let durationSecs: number | undefined;
-		if (track.duration) {
-			const parts = track.duration.split(':').map((p) => parseInt(p, 10));
-			if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-				durationSecs = parts[0] * 60 + parts[1];
-			} else if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
-				durationSecs = parts[0] * 3600 + parts[1] * 60 + parts[2];
-			}
-		}
-
-		const req: DownloadRequest = {
+		const requests: DownloadRequest[] = tracks.map((track) => ({
 			video_id: track.video_id,
 			title: track.title,
 			artists: track.artists,
 			album: track.album,
 			thumbnail: track.thumbnail,
-			duration_secs: durationSecs,
+			duration_secs: this.parseDuration(track.duration),
 			quality: chosenQuality,
 			output_dir: targetDir || undefined
-		};
+		}));
 
 		try {
-			await api.startDownload(req);
-			toast.info(t('download.started', { title: track.title }));
+			if (requests.length === 1) {
+				await api.startDownload(requests[0]);
+				toast.info(t('download.started', { title: requests[0].title }));
+			} else {
+				await api.startDownloadsBatch(requests);
+				toast.info(t('download.batch_started', { count: requests.length }));
+			}
 		} catch (err) {
 			toast.error(String(err));
 		}

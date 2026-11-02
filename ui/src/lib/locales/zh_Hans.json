@@ -1096,5 +1096,11 @@
 			"not_found": "在 YouTube Music 上未找到该内容。",
 			"cooldown": "YouTube Music 请求 Veluna 降低请求速率，因此导入已暂停至 {time}。目前找到的所有内容已保存。"
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

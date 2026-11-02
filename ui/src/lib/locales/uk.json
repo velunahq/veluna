@@ -1276,5 +1276,11 @@
 		"clear_desc": "Це зітре всі підраховані на цьому пристрої прослуховування: статистика почнеться спочатку, а список «На повторі» очиститься. Ваша історія в YouTube Music залишиться незмінною.",
 		"clear_confirm": "Очистити історію",
 		"cleared": "Історію прослуховувань очищено"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

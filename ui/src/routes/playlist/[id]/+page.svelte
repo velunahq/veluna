@@ -23,7 +23,8 @@
 		ArrowUpDownIcon,
 		ComputerIcon,
 		SpotifyIcon,
-		Search01Icon
+		Search01Icon,
+		Download01Icon
 	} from '@hugeicons/core-free-icons';
 	import { Button } from '$lib/components/ui/button';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
@@ -35,6 +36,7 @@
 	import TrackSelectionBar from '$lib/components/TrackSelectionBar.svelte';
 	import TrackSelectButton from '$lib/components/TrackSelectButton.svelte';
 	import { trackSelection } from '$lib/selection.svelte';
+	import { downloadManager } from '$lib/download.svelte';
 	import { subtitleCount, withSubtitleCount } from '$lib/trackcount';
 	import EditPlaylistDialog from '$lib/components/EditPlaylistDialog.svelte';
 	import TrackFilter, { filterTracks } from '$lib/components/TrackFilter.svelte';
@@ -1329,6 +1331,19 @@
 		>
 			<HugeiconsIcon icon={DashboardSquare02Icon} class="h-4 w-4" /> {t('player.add_to_shortcuts')}
 		</button>
+		{#if !isLocalList}
+			<button
+				class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent/10"
+				onclick={() => {
+					const items = (pl?.items ?? []).filter((s) => !api.isLocalId(s.video_id));
+					if (items.length) {
+						downloadManager.openDialog(items);
+					}
+				}}
+			>
+				<HugeiconsIcon icon={Download01Icon} class="h-4 w-4" /> {t('download.button')}
+			</button>
+		{/if}
 		{#if !isOnRepeat && !isLocalList}
 			<button
 				class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent/10"

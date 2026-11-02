@@ -1096,5 +1096,11 @@
 			"not_found": "تعذر العثور على ذلك في YouTube Music.",
 			"cooldown": "طلب YouTube Music من Veluna التمهل، لذا توقف الاستيراد مؤقتاً حتى {time}. تم حفظ كل ما عُثر عليه حتى الآن."
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

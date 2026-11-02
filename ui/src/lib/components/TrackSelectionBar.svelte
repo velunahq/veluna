@@ -8,10 +8,12 @@
 		PlayListAddIcon,
 		PlayListRemoveIcon,
 		RepeatIcon,
-		Cancel01Icon
+		Cancel01Icon,
+		Download01Icon
 	} from '@hugeicons/core-free-icons';
 	import { Button } from './ui/button';
 	import { enqueue, openAddManyToPlaylist, openPlayer, toast, ui } from '$lib/player.svelte';
+	import { downloadManager } from '$lib/download.svelte';
 	import * as api from '$lib/api';
 	import type { SongItem } from '$lib/api';
 	import { lt } from '$lib/lt.svelte';
@@ -132,6 +134,16 @@
 						<HugeiconsIcon icon={PlayListAddIcon} class="h-4 w-4" />
 					</Button>
 				{/if}
+				<Button variant="ghost" size="icon" disabled={blocked} onkeydown={onKey}
+					title={t('download.button')} aria-label={t('download.button')}
+					onclick={() => {
+						const songsToDownload = [...selection.songs].filter((s) => !api.isLocalId(s.video_id));
+						if (songsToDownload.length) {
+							downloadManager.openDialog(songsToDownload);
+						}
+					}}>
+					<HugeiconsIcon icon={Download01Icon} class="h-4 w-4" />
+				</Button>
 				{#if onRemove}
 					{#if confirmRemove}
 						<Button variant="destructive" size="sm" disabled={blocked} onkeydown={onKey}

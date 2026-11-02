@@ -1276,5 +1276,11 @@
 		"clear_desc": "Hal ini menghapus setiap putaran yang dihitung pada perangkat ini, sehingga statistik Anda dimulai dari awal dan On Repeat dikosongkan. Riwayat YouTube Music Anda tidak disentuh.",
 		"clear_confirm": "Hapus riwayat",
 		"cleared": "Riwayat mendengar telah dihapus"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

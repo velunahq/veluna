@@ -1208,5 +1208,11 @@
 		"hearted": "Üretici tarafından beğenildi",
 		"creator": "Üretici",
 		"reload_needed": "Yorumlar güncel değil. Devam etmek için sayfayı yeniden yükleyin."
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

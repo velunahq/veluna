@@ -1335,7 +1335,7 @@ export interface DownloadProgress {
 	title: string;
 	artists: string;
 	quality: string;
-	status: 'downloading' | 'transcoding' | 'tagging' | 'completed' | 'failed' | 'cancelled';
+	status: 'queued' | 'downloading' | 'transcoding' | 'tagging' | 'completed' | 'failed' | 'cancelled';
 	percent: number;
 	bytes_downloaded: number;
 	total_bytes: number;
@@ -1346,6 +1346,8 @@ export interface DownloadProgress {
 
 export const startDownload = (req: DownloadRequest) =>
 	invoke<string>('start_download', { req });
+export const startDownloadsBatch = (requests: DownloadRequest[]) =>
+	invoke<string[]>('start_downloads_batch', { requests });
 export const cancelDownload = (id: string) =>
 	invoke<boolean>('cancel_download', { id });
 export const getActiveDownloads = () =>

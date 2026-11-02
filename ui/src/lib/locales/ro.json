@@ -1189,5 +1189,11 @@
 			"not_found": "Nu s-a putut găsi pe YouTube Music.",
 			"cooldown": "YouTube Music a solicitat o încetinire a cererilor, astfel că importurile sunt suspendate până la {time}. Tot ce s-a găsit până acum a fost salvat."
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

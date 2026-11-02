@@ -1189,5 +1189,11 @@
 		"delete_desc": "Това действие е необратимо. Всички отговори към него също ще бъдат изтрити.",
 		"held": "Коментари за {title}",
 		"follow_current": "Покажи текущата песен"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

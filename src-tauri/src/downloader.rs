@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_shell::ShellExt;
 use tokio::io::AsyncWriteExt;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Semaphore};
 
 const CHUNK_SIZE: u64 = 4 * 1024 * 1024; // 4MB bounded range requests to avoid YouTube's 2x realtime throttle
 
@@ -199,6 +199,7 @@ pub struct DownloadManager {
     app: AppHandle,
     active_flags: Mutex<HashMap<String, Arc<AtomicBool>>>,
     downloads: Mutex<HashMap<String, DownloadProgress>>,
+    semaphore: Arc<Semaphore>,
 }
 
 impl DownloadManager {
@@ -207,6 +208,7 @@ impl DownloadManager {
             app,
             active_flags: Mutex::new(HashMap::new()),
             downloads: Mutex::new(HashMap::new()),
+            semaphore: Arc::new(Semaphore::new(3)),
         }
     }
 
@@ -225,8 +227,8 @@ impl DownloadManager {
     }
 
     pub async fn cancel(&self, id: &str) -> bool {
-        let mut flags = self.active_flags.lock().await;
-        if let Some(flag) = flags.remove(id) {
+        let flags = self.active_flags.lock().await;
+        if let Some(flag) = flags.get(id) {
             flag.store(true, Ordering::SeqCst);
             true
         } else {
@@ -260,7 +262,7 @@ impl DownloadManager {
             title: req.title.clone(),
             artists: req.artists.clone(),
             quality: req.quality.clone(),
-            status: "downloading".to_string(),
+            status: "queued".to_string(),
             percent: 0.0,
             bytes_downloaded: 0,
             total_bytes: 0,
@@ -278,11 +280,37 @@ impl DownloadManager {
         let dm = self.clone();
         let app_handle = self.app.clone();
         let id_for_task = download_id.clone();
+        let sem = self.semaphore.clone();
 
         tauri::async_runtime::spawn(async move {
+            let permit = match sem.acquire_owned().await {
+                Ok(p) => p,
+                Err(_) => return,
+            };
+
+            if cancel_flag.load(Ordering::SeqCst) {
+                drop(permit);
+                dm.active_flags.lock().await.remove(&id_for_task);
+                let mut lock = dm.downloads.lock().await;
+                if let Some(item) = lock.get_mut(&id_for_task) {
+                    item.status = "cancelled".to_string();
+                    let _ = app_handle.emit("download_progress", &*item);
+                }
+                return;
+            }
+
+            {
+                let mut lock = dm.downloads.lock().await;
+                if let Some(item) = lock.get_mut(&id_for_task) {
+                    item.status = "downloading".to_string();
+                    let _ = app_handle.emit("download_progress", &*item);
+                }
+            }
+
             let res = dm
                 .run_download(state, req, &id_for_task, cancel_flag.clone())
                 .await;
+            drop(permit);
             dm.active_flags.lock().await.remove(&id_for_task);
 
             match res {
@@ -312,6 +340,19 @@ impl DownloadManager {
         });
 
         Ok(download_id)
+    }
+
+    pub async fn start_batch(
+        self: &Arc<Self>,
+        state: Arc<crate::state::AppState>,
+        requests: Vec<DownloadRequest>,
+    ) -> Result<Vec<String>, String> {
+        let mut ids = Vec::with_capacity(requests.len());
+        for req in requests {
+            let id = self.start(state.clone(), req).await?;
+            ids.push(id);
+        }
+        Ok(ids)
     }
 
     async fn run_download(
@@ -387,6 +428,25 @@ impl DownloadManager {
         let safe_title = sanitize_filename(&title);
         let safe_artists = sanitize_filename(&artists);
         let target_path = output_dir.join(format!("{safe_artists} - {safe_title}.{}", config.ext));
+
+        // Skip if target file already exists and has a non-zero size
+        if target_path.exists() {
+            if let Ok(meta) = tokio::fs::metadata(&target_path).await {
+                if meta.len() > 1024 {
+                    let mut lock = self.downloads.lock().await;
+                    if let Some(item) = lock.get_mut(download_id) {
+                        item.percent = 100.0;
+                        item.status = "completed".to_string();
+                        item.file_path = Some(target_path.to_string_lossy().to_string());
+                        let _ = self.app.emit("download_progress", &*item);
+                    }
+                    // Ensure folder is registered with local music library
+                    let folder_str = output_dir.to_string_lossy().to_string();
+                    crate::local::add_folder(&state.db, folder_str);
+                    return Ok(target_path);
+                }
+            }
+        }
 
         let ffmpeg_available = is_ffmpeg_available(&self.app).await;
         let is_native_request = req.quality == "best_opus" || req.quality == "aac_native";

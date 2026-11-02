@@ -1096,5 +1096,11 @@
 			"not_found": "YouTube Musicで見つかりませんでした。",
 			"cooldown": "YouTube Musicのリクエスト制限がかかったため、インポートを{time}まで一時停止します。それまでに検出された項目は保存されています。"
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

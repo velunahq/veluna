@@ -1213,5 +1213,11 @@
 		"delete_desc": "Isso não pode ser desfeito. Qualquer resposta a ele também será excluída.",
 		"held": "Comentários em {title}",
 		"follow_current": "Mostrar faixa atual"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

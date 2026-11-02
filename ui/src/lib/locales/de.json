@@ -1096,5 +1096,11 @@
 			"cooldown": "YouTube Music hat um Drosselung gebeten. Importe sind bis {time} pausiert. Bisher Gefundenes bleibt gespeichert."
 		},
 		"creating_progress": "{done} von {total} erledigt"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

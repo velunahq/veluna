@@ -1140,5 +1140,11 @@
 		"keep": "Wygląda dobrze",
 		"skip": "Pomiń",
 		"name_label": "Nazwa playlisty"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

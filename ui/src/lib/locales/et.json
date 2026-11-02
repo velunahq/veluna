@@ -1213,5 +1213,11 @@
 		"delete_desc": "Seda ei saa tagasi võtta. Kustutatakse ka kõik selle vastused.",
 		"held": "Loo „{title}“ kommentaarid",
 		"follow_current": "Näita praegust lugu"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

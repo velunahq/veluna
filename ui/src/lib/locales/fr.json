@@ -945,5 +945,11 @@
 		"anyway_hint": "Conserver en double exemplaire",
 		"anyway_hint_local": "Les copies supplémentaires s'appliquent uniquement aux playlists YouTube",
 		"adds": "+{count}"
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }

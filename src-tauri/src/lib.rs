@@ -1141,6 +1141,7 @@ pub fn run() {
             commands::save_diagnostics,
             commands::log_ui,
             commands::start_download,
+            commands::start_downloads_batch,
             commands::cancel_download,
             commands::get_active_downloads,
             commands::get_default_download_dir,

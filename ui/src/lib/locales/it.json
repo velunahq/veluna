@@ -1189,5 +1189,11 @@
 			"not_found": "Impossibile trovare l'elemento su YouTube Music.",
 			"cooldown": "YouTube Music ha richiesto di rallentare: le importazioni sono in pausa fino alle {time}. Tutti i progressi effettuati sono salvati."
 		}
+	},
+	"download": {
+		"batch_title": "Download {count} Songs",
+		"batch_summary": "{count} songs selected for download",
+		"batch_started": "Queued {count} songs for download",
+		"start_batch": "Download {count} Songs"
 	}
 }
