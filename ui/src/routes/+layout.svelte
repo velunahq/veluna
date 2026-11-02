@@ -43,6 +43,8 @@
 	import LinkDialog from '$lib/components/LinkDialog.svelte';
 	import ImportDialog from '$lib/components/ImportDialog.svelte';
 	import DownloadDialog from '$lib/components/DownloadDialog.svelte';
+	import DownloadsPanel from '$lib/components/DownloadsPanel.svelte';
+	import { downloadManager } from '$lib/download.svelte';
 	import { handleImportDrop, initImport } from '$lib/import.svelte';
 	import MiniPlayer from '$lib/components/MiniPlayer.svelte';
 	import NowPlaying from '$lib/components/NowPlaying.svelte';
@@ -301,6 +303,9 @@
 					queueOpen={showQueue}
 				/>{/if}
 			{#if showQueue}<QueuePanel onClose={() => (queueOpen = false)} />{/if}
+			{#if downloadManager.panelOpen}
+				<DownloadsPanel onClose={() => (downloadManager.panelOpen = false)} />
+			{/if}
 		</div>
 		{#if playback.now}
 			<!-- Slides up from its own height on first play; leaves instantly (bar removal is rare).
@@ -311,6 +316,8 @@
 				<PlayerBar
 					onToggleQueue={() => (tabbed ? (np.tab = 'queue') : (queueOpen = !queueOpen))}
 					queueOpen={tabbed ? np.tab === 'queue' : queueOpen}
+					onToggleDownloads={() => (downloadManager.panelOpen = !downloadManager.panelOpen)}
+					downloadsOpen={downloadManager.panelOpen}
 					onToggleLyrics={() => {
 						if (tabbed) np.tab = 'lyrics';
 						else {

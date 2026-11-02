@@ -75,6 +75,8 @@ class DownloadStore {
 		(typeof localStorage !== 'undefined' && localStorage.getItem(STORAGE_DIR_KEY)) || ''
 	);
 
+	panelOpen = $state(false);
+
 	get dialogTrack(): SongItem | null {
 		return this.dialogTracks.length > 0 ? this.dialogTracks[0] : null;
 	}
@@ -87,6 +89,25 @@ class DownloadStore {
 				d.status === 'transcoding' ||
 				d.status === 'tagging'
 		).length;
+	}
+
+	clearCompleted() {
+		this.items = this.items.filter(
+			(d) => d.status !== 'completed' && d.status !== 'failed' && d.status !== 'cancelled'
+		);
+	}
+
+	async cancelAll() {
+		const active = this.items.filter(
+			(d) =>
+				d.status === 'queued' ||
+				d.status === 'downloading' ||
+				d.status === 'transcoding' ||
+				d.status === 'tagging'
+		);
+		for (const item of active) {
+			await this.cancel(item.id);
+		}
 	}
 
 	constructor() {

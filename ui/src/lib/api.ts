@@ -1356,6 +1356,8 @@ export const getDefaultDownloadDir = () =>
 	invoke<string>('get_default_download_dir');
 export const openDownloadDir = (path?: string) =>
 	invoke<void>('open_download_dir', { path });
+export const showItemInFolder = (path: string) =>
+	invoke<void>('show_item_in_folder', { path });
 
 export const onDownloadProgress = (cb: (p: DownloadProgress) => void): Promise<UnlistenFn> =>
 	listen<DownloadProgress>('download_progress', (e) => cb(e.payload));

@@ -1146,6 +1146,7 @@ pub fn run() {
             commands::get_active_downloads,
             commands::get_default_download_dir,
             commands::open_download_dir,
+            commands::show_item_in_folder,
         ]))
         .on_window_event(|window, event| {
             // Close-to-tray: ✕ hides the main window and playback keeps running; real quit is

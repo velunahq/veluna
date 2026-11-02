@@ -1101,6 +1101,37 @@
 		"batch_title": "Download {count} Songs",
 		"batch_summary": "{count} songs selected for download",
 		"batch_started": "Queued {count} songs for download",
-		"start_batch": "Download {count} Songs"
+		"start_batch": "Download {count} Songs",
+		"panel_title": "Downloads",
+		"no_downloads": "No downloads yet",
+		"no_downloads_sub": "Downloaded tracks and active streams will appear here",
+		"cancel_all": "Cancel active",
+		"clear_completed": "Clear finished",
+		"show_in_folder": "Show in folder",
+		"status_queued": "Queued",
+		"status_transcoding": "Transcoding",
+		"status_tagging": "Tagging",
+		"status_completed": "Completed",
+		"status_failed": "Failed",
+		"status_cancelled": "Cancelled"
+	},
+	"sleep_timer": {
+		"title": "Sleep Timer",
+		"turn_off": "Turn off timer",
+		"active_countdown": "{time} remaining",
+		"end_of_song": "End of song",
+		"end_of_queue": "End of queue",
+		"opt_5": "5 minutes",
+		"opt_10": "10 minutes",
+		"opt_15": "15 minutes",
+		"opt_30": "30 minutes",
+		"opt_45": "45 minutes",
+		"opt_60": "1 hour",
+		"opt_end_song": "End of current song",
+		"opt_end_queue": "End of queue",
+		"toast_set_minutes": "Sleep timer set for {minutes} minutes",
+		"toast_set_end_of_song": "Sleep timer set to stop after this song",
+		"toast_set_end_of_queue": "Sleep timer set to stop after the queue finishes",
+		"toast_fired": "Sleep timer finished: playback paused"
 	}
 }

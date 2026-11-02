@@ -19,12 +19,17 @@
 		MinimizeScreenIcon,
 		MusicNote01Icon,
 		ArrowUp01Icon,
-		ArrowDown01Icon
+		ArrowDown01Icon,
+		Download01Icon,
+		Moon02Icon
 	} from '@hugeicons/core-free-icons';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as api from '$lib/api';
+	import { downloadManager } from '$lib/download.svelte';
+	import { sleepTimer } from '$lib/sleeptimer.svelte';
+	import SleepTimerDialog from './SleepTimerDialog.svelte';
 	import {
 		np,
 		playback,
@@ -49,7 +54,9 @@
 		onToggleLyrics,
 		lyricsOpen,
 		onToggleComments,
-		commentsOpen
+		commentsOpen,
+		onToggleDownloads,
+		downloadsOpen
 	}: {
 		onToggleQueue: () => void;
 		queueOpen: boolean;
@@ -57,7 +64,11 @@
 		lyricsOpen: boolean;
 		onToggleComments: () => void;
 		commentsOpen: boolean;
+		onToggleDownloads?: () => void;
+		downloadsOpen?: boolean;
 	} = $props();
+
+	let sleepTimerOpen = $state(false);
 
 	// Pop the heart once when the user favourites (not when un-favouriting). Reset on animation end
 	// so the next like can replay it.
@@ -407,6 +418,32 @@
 			>
 				<HugeiconsIcon icon={Queue01Icon} class="h-5 w-5" />
 			</Button>
+			{#if onToggleDownloads}
+				<Button
+					variant={downloadsOpen ? 'secondary' : 'ghost'}
+					size="icon-sm"
+					onclick={onToggleDownloads}
+					aria-label={t('download.panel_title')}
+					title={t('download.panel_title')}
+					class="relative"
+				>
+					<HugeiconsIcon icon={Download01Icon} class="h-5 w-5" />
+					{#if downloadManager.activeCount > 0}
+						<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground animate-pulse">
+							{downloadManager.activeCount}
+						</span>
+					{/if}
+				</Button>
+			{/if}
+			<Button
+				variant={sleepTimer.active ? 'secondary' : 'ghost'}
+				size="icon-sm"
+				onclick={() => (sleepTimerOpen = true)}
+				aria-label={t('sleep_timer.title')}
+				title={sleepTimer.active ? t('sleep_timer.active_countdown', { time: sleepTimer.formatted }) : t('sleep_timer.title')}
+			>
+				<HugeiconsIcon icon={Moon02Icon} class="h-5 w-5 {sleepTimer.active ? 'text-primary' : ''}" />
+			</Button>
 			<!-- The keyboard (and discoverable) way in and out of the now-playing view; clicking the
 			     bar's empty space does the same thing. -->
 			<Button
@@ -427,3 +464,5 @@
 		</div>
 	</div>
 </footer>
+
+<SleepTimerDialog bind:open={sleepTimerOpen} />

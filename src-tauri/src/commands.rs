@@ -2748,44 +2748,163 @@ pub fn get_default_download_dir(state: St<'_>) -> Result<String, String> {
     Ok(state.downloader.default_download_dir().to_string_lossy().to_string())
 }
 
+#[cfg(target_os = "linux")]
+fn is_editor_desktop(desktop: &str) -> bool {
+    let d = desktop.to_lowercase();
+    d.contains("code")
+        || d.contains("codium")
+        || d.contains("cursor")
+        || d.contains("vim")
+        || d.contains("gedit")
+        || d.contains("kate")
+        || d.contains("sublime")
+        || d.contains("atom")
+        || d.contains("text")
+}
+
+#[cfg(target_os = "linux")]
+fn linux_open_folder(p: &std::path::Path) {
+    let p_str = p.to_string_lossy();
+    let uri = format!("file://{p_str}");
+
+    // 1. Try DBus org.freedesktop.FileManager1.ShowFolders (standard file manager service)
+    if let Ok(mut child) = std::process::Command::new("dbus-send")
+        .args([
+            "--session",
+            "--dest=org.freedesktop.FileManager1",
+            "--type=method_call",
+            "/org/freedesktop/FileManager1",
+            "org.freedesktop.FileManager1.ShowFolders",
+            &format!("array:string:{uri}"),
+            "string:",
+        ])
+        .spawn()
+    {
+        if let Ok(status) = child.wait() {
+            if status.success() {
+                return;
+            }
+        }
+    }
+
+    // 2. Launch known desktop file managers directly.
+    // Explicitly checking these first prevents opening text editors or IDEs (e.g. VS Code, Codium)
+    // when users or package managers accidentally associate inode/directory with an editor.
+    const MANAGERS: &[&str] = &[
+        "nautilus",
+        "dolphin",
+        "nemo",
+        "thunar",
+        "caja",
+        "pcmanfm",
+        "pcmanfm-qt",
+        "io.elementary.files",
+    ];
+    for mgr in MANAGERS {
+        if std::process::Command::new(mgr).arg(p).spawn().is_ok() {
+            return;
+        }
+    }
+
+    // 3. Fallback to xdg-open ONLY if default handler is not an editor
+    let default_app = std::process::Command::new("xdg-mime")
+        .args(["query", "default", "inode/directory"])
+        .output()
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
+        .unwrap_or_default();
+
+    if !default_app.is_empty() && !is_editor_desktop(&default_app) {
+        let _ = std::process::Command::new("xdg-open").arg(p).spawn();
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_show_item(p: &std::path::Path) {
+    let p_str = p.to_string_lossy();
+    let uri = format!("file://{p_str}");
+
+    // 1. Try DBus org.freedesktop.FileManager1.ShowItems
+    if let Ok(mut child) = std::process::Command::new("dbus-send")
+        .args([
+            "--session",
+            "--dest=org.freedesktop.FileManager1",
+            "--type=method_call",
+            "/org/freedesktop/FileManager1",
+            "org.freedesktop.FileManager1.ShowItems",
+            &format!("array:string:{uri}"),
+            "string:",
+        ])
+        .spawn()
+    {
+        if let Ok(status) = child.wait() {
+            if status.success() {
+                return;
+            }
+        }
+    }
+
+    // 2. Try file managers with item selection support
+    if std::process::Command::new("nautilus").args(["--select", p_str.as_ref()]).spawn().is_ok() {
+        return;
+    }
+    if std::process::Command::new("dolphin").args(["--select", p_str.as_ref()]).spawn().is_ok() {
+        return;
+    }
+    if std::process::Command::new("nemo").args(["--no-desktop", p_str.as_ref()]).spawn().is_ok() {
+        return;
+    }
+
+    // 3. Fallback: open parent folder in file manager
+    if let Some(parent) = p.parent() {
+        linux_open_folder(parent);
+    }
+}
+
 #[tauri::command]
 pub fn open_download_dir(state: St<'_>, path: Option<String>) -> Result<(), String> {
     let p = path
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| state.downloader.default_download_dir());
     let _ = std::fs::create_dir_all(&p);
-    #[cfg(target_os = "linux")]
+
+    #[cfg(target_os = "windows")]
     {
-        // Prioritize default desktop file manager via xdg-open
-        let mut opened = std::process::Command::new("xdg-open").arg(&p).spawn().is_ok();
-        if !opened {
-            const MANAGERS: &[&str] = &[
-                "nautilus",
-                "dolphin",
-                "nemo",
-                "thunar",
-                "caja",
-                "pcmanfm",
-                "pcmanfm-qt",
-                "io.elementary.files",
-            ];
-            for mgr in MANAGERS {
-                if std::process::Command::new(mgr).arg(&p).spawn().is_ok() {
-                    opened = true;
-                    break;
-                }
-            }
-        }
-        let _ = opened;
+        let win_path = p.to_string_lossy().replace('/', "\\");
+        let _ = std::process::Command::new("explorer").arg(&win_path).spawn();
     }
     #[cfg(target_os = "macos")]
     {
         let _ = std::process::Command::new("open").arg(&p).spawn();
     }
+    #[cfg(target_os = "linux")]
+    {
+        linux_open_folder(&p);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn show_item_in_folder(path: String) -> Result<(), String> {
+    let p = std::path::PathBuf::from(&path);
+    if !p.exists() {
+        return Err("File does not exist".to_string());
+    }
+
     #[cfg(target_os = "windows")]
     {
+        use std::os::windows::process::CommandExt;
         let win_path = p.to_string_lossy().replace('/', "\\");
-        let _ = std::process::Command::new("explorer").arg(win_path).spawn();
+        let mut cmd = std::process::Command::new("explorer");
+        cmd.raw_arg(format!("/select,\"{win_path}\""));
+        let _ = cmd.spawn();
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("open").arg("-R").arg(&p).spawn();
+    }
+    #[cfg(target_os = "linux")]
+    {
+        linux_show_item(&p);
     }
     Ok(())
 }
