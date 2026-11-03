@@ -27,7 +27,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-REPO="${GITHUB_REPOSITORY:-rry0ku/veluna}"
+REPO="${GITHUB_REPOSITORY:-velunahq/veluna}"
 KEY="${TAURI_SIGNING_PRIVATE_KEY_FILE:-$HOME/.tauri/veluna.key}"
 NOTES="${1:-See the commit history for changes.}"
 

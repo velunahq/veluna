@@ -181,7 +181,7 @@
 				version,
 				system
 			});
-			await api.openExternal(`https://github.com/rry0ku/veluna/issues/new?${q}`);
+			await api.openExternal(`https://github.com/velunahq/veluna/issues/new?${q}`);
 		} catch (e) {
 			diagError = String(e);
 		}

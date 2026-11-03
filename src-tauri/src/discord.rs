@@ -59,9 +59,9 @@ const APP_ID: &str = "1517835351044001953";
 const SONG_URL: &str = "https://music.youtube.com/watch?v=";
 const ARTIST_URL: &str = "https://music.youtube.com/channel/";
 const ALBUM_URL: &str = "https://music.youtube.com/browse/";
-const REPO_URL: &str = "https://rry0ku.github.io/veluna/";
+const REPO_URL: &str = "https://velunahq.github.io/veluna/";
 const BADGE_URL: &str =
-    "https://raw.githubusercontent.com/rry0ku/veluna/main/src-tauri/icons/128x128.png";
+    "https://raw.githubusercontent.com/velunahq/veluna/main/src-tauri/icons/128x128.png";
 
 /// Reconnect backoff while enabled but unconnected (Discord not running, or it quit). Starts short
 /// — Discord may simply be slower to start than we are — and eases off so a permanently-absent

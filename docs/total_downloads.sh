@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="${1:-rry0ku/veluna}"
+REPO="${1:-velunahq/veluna}"
 API="https://api.github.com/repos/${REPO}/releases"
 
 for cmd in curl jq; do

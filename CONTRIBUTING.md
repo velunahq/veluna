@@ -124,7 +124,7 @@ npm run setup:deps
 
 If you prefer to configure binaries manually:
 
-1. Download `binaries.zip` from the latest [GitHub Release](https://github.com/rry0ku/veluna/releases).
+1. Download `binaries.zip` from the latest [GitHub Release](https://github.com/velunahq/veluna/releases).
 2. Extract the contents directly into the `src-tauri/binaries/` directory.
 3. Ensure the following files exist in `src-tauri/binaries/`:
    - `mpv-x86_64-pc-windows-msvc.exe`
@@ -139,7 +139,7 @@ If you prefer to configure binaries manually:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/rry0ku/veluna.git
+git clone https://github.com/velunahq/veluna.git
 cd veluna
 ```
 
@@ -285,4 +285,4 @@ Test the relevant functionality manually:
 If you have questions, need guidance, or want to discuss ideas before implementing them:
 
 - Join our **Discord Community**: https://discord.com/invite/u7QXUgPcqr
-- Open an issue on **GitHub**: https://github.com/rry0ku/veluna/issues
+- Open an issue on **GitHub**: https://github.com/velunahq/veluna/issues

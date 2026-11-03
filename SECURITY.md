@@ -15,7 +15,7 @@ The Veluna team takes the security of our application and users seriously. If yo
 Please report security vulnerabilities through one of the following channels:
 
 1. **GitHub Private Vulnerability Reporting (Recommended)**:
-   Navigate to the [Security Advisories](https://github.com/rry0ku/veluna/security/advisories) page and click **Report a vulnerability**. This allows secure, private communication directly with the project maintainers.
+   Navigate to the [Security Advisories](https://github.com/velunahq/veluna/security/advisories) page and click **Report a vulnerability**. This allows secure, private communication directly with the project maintainers.
 
 2. **Discord Security Contact**:
    Reach out directly to the maintainer via our [Discord Community](https://discord.com/invite/u7QXUgPcqr) in a direct message.

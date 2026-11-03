@@ -12,8 +12,8 @@ members = [
 version = "0.1.7"
 edition = "2021"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/rry0ku/veluna"
-homepage = "https://rry0ku.github.io/veluna/"
+repository = "https://github.com/velunahq/veluna"
+homepage = "https://velunahq.github.io/veluna/"
 description = "Ad-free desktop music streaming powered by YouTube. Stream millions of songs without subscriptions, bloat, or interruptions."
 
 [workspace.dependencies]

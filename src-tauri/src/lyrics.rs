@@ -416,7 +416,7 @@ impl LrclibTrack {
 
 /// LRCLIB asks integrations to identify themselves via User-Agent.
 const LRCLIB_UA: &str =
-    concat!("Veluna v", env!("CARGO_PKG_VERSION"), " (https://github.com/rry0ku/veluna)");
+    concat!("Veluna v", env!("CARGO_PKG_VERSION"), " (https://github.com/velunahq/veluna)");
 
 /// A GET to LRCLIB, carrying the two things this API wants from us: who we are, and a bound on how
 /// long we will wait. Both used to be baked into a client of our own.

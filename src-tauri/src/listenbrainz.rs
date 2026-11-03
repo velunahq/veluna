@@ -22,7 +22,7 @@ use crate::state::AppState;
 
 const API_ROOT: &str = "https://api.listenbrainz.org";
 const USER_AGENT: &str =
-    concat!("Veluna/", env!("CARGO_PKG_VERSION"), " (https://github.com/rry0ku/veluna)");
+    concat!("Veluna/", env!("CARGO_PKG_VERSION"), " (https://github.com/velunahq/veluna)");
 
 /// The `track_metadata` object for one listen. `video_id` feeds `origin_url` for YouTube tracks
 /// (and picks the music service); local files carry no URL.

@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const tag = process.argv[2] || process.env.TAG || 'v0.1.7';
 const distDir = path.resolve(process.argv[3] || 'dist');
-const repo = process.env.GITHUB_REPOSITORY || 'rry0ku/veluna';
+const repo = process.env.GITHUB_REPOSITORY || 'velunahq/veluna';
 
 if (!fs.existsSync(distDir)) {
   console.error(`Dist directory ${distDir} does not exist.`);

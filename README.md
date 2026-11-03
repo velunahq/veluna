@@ -13,7 +13,7 @@ Native desktop performance built with Rust and Tauri for Windows, macOS, and Lin
 </p>
 
 <p align="center">
-  <a href="https://github.com/rry0ku/veluna/releases"><img src="https://img.shields.io/badge/Download%20for%20Windows%2C%20macOS%20%26%20Linux-ea580c?style=for-the-badge" alt="Download" /></a>
+  <a href="https://github.com/velunahq/veluna/releases"><img src="https://img.shields.io/badge/Download%20for%20Windows%2C%20macOS%20%26%20Linux-ea580c?style=for-the-badge" alt="Download" /></a>
   <a href="https://discord.com/invite/u7QXUgPcqr"><img src="https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" /></a>
 </p>
 
@@ -26,19 +26,19 @@ Native desktop performance built with Rust and Tauri for Windows, macOS, and Lin
 </p>
 
 <p align="center">
-  <a href="https://github.com/rry0ku/veluna/releases"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-informational?style=flat-square&logo=apple&logoColor=white" alt="Platform" /></a>
+  <a href="https://github.com/velunahq/veluna/releases"><img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-informational?style=flat-square&logo=apple&logoColor=white" alt="Platform" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-ea580c?style=flat-square" alt="License" /></a>
   <a href="https://tauri.app"><img src="https://img.shields.io/badge/Tauri-v2-FFC131?style=flat-square&logo=tauri&logoColor=white" alt="Tauri" /></a>
   <a href="https://www.rust-lang.org"><img src="https://img.shields.io/badge/Rust-stable-CE422B?style=flat-square&logo=rust&logoColor=white" alt="Rust" /></a>
   <a href="https://svelte.dev"><img src="https://img.shields.io/badge/Svelte-5-FF3E00?style=flat-square&logo=svelte&logoColor=white" alt="Svelte" /></a>
-  <a href="https://github.com/rry0ku/veluna/stargazers"><img src="https://img.shields.io/github/stars/rry0ku/veluna?style=flat-square&color=ea580c" alt="Stars" /></a>
+  <a href="https://github.com/velunahq/veluna/stargazers"><img src="https://img.shields.io/github/stars/velunahq/veluna?style=flat-square&color=ea580c" alt="Stars" /></a>
 </p>
 
 <p align="center">
-  <strong><a href="https://github.com/rry0ku/veluna/releases">Download Releases</a></strong> |
+  <strong><a href="https://github.com/velunahq/veluna/releases">Download Releases</a></strong> |
   <strong><a href="#building-from-source">Build from Source</a></strong> |
   <strong><a href="CONTRIBUTING.md">Contribute</a></strong> |
-  <strong><a href="https://github.com/rry0ku/veluna/issues">Report an Issue</a></strong> |
+  <strong><a href="https://github.com/velunahq/veluna/issues">Report an Issue</a></strong> |
   <strong><a href="#legal-and-fair-use">Legal and Fair Use</a></strong>
 </p>
 
@@ -116,7 +116,7 @@ Veluna is a fast, lightweight desktop music player built with Rust, Tauri, and S
 
 ## Installation
 
-Download ready-to-run release binaries for your operating system from the **[Releases](https://github.com/rry0ku/veluna/releases)** page.
+Download ready-to-run release binaries for your operating system from the **[Releases](https://github.com/velunahq/veluna/releases)** page.
 
 ### Linux
 
@@ -165,7 +165,7 @@ Veluna provides an interactive NSIS setup installer as well as a standalone MSI 
 
 Veluna supports Apple Silicon (M1/M2/M3/M4) devices running macOS 11.0 or higher:
 
-1. Download the `veluna_<version>_aarch64.dmg` disk image from [Releases](https://github.com/rry0ku/veluna/releases).
+1. Download the `veluna_<version>_aarch64.dmg` disk image from [Releases](https://github.com/velunahq/veluna/releases).
 2. Double-click the DMG to open it, and drag **Veluna** into your **Applications** folder.
 3. Launch Veluna from Spotlight or Launchpad.
 
@@ -215,7 +215,7 @@ Before building Veluna, ensure you have the following installed on your system:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/rry0ku/veluna.git
+   git clone https://github.com/velunahq/veluna.git
    cd veluna
    ```
 

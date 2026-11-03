@@ -6,7 +6,7 @@ import { t } from './i18n.svelte';
 import { friendlyNetError } from './neterr';
 import { getSettings, openExternal, canSelfUpdate } from './api';
 
-const RELEASES_URL = 'https://github.com/rry0ku/veluna/releases/latest';
+const RELEASES_URL = 'https://github.com/velunahq/veluna/releases/latest';
 
 /** How often the quiet check repeats while the app stays open. */
 export const QUIET_INTERVAL_MS = 6 * 60 * 60 * 1000;
