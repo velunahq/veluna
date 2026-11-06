@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://velunahq.github.io/veluna/sitemap.xml
