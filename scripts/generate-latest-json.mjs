@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const tag = process.argv[2] || process.env.TAG || 'v0.1.7';
+const tag = process.argv[2] || process.env.TAG || 'v0.1.8';
 const distDir = path.resolve(process.argv[3] || 'dist');
 const repo = process.env.GITHUB_REPOSITORY || 'velunahq/veluna';
 
