@@ -69,7 +69,7 @@
       "endpoints": [
         "https://github.com/velunahq/veluna/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk0MENDMzA1NUFGMDI0NTQKUldSVUpQQmFCY01NbENPbW9XOTRvVU9YQ2lCQytOU2RyeDhHNFhkWHlNc1dITkFmbkd1ZTBlM1gK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEYyRkY2RDM2NUIxRTU5M0UKUldRK1dSNWJObTMvOGl6SDRKSDZ5R2pLZ1l6dGsvRFFkck1lZGd0ZDl3MEZZeVBIWm9rZmQzTmkK",
       "windows": {
         "installMode": "passive"
       }
