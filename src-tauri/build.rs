@@ -4,6 +4,18 @@ fn main() {
     // `VELUNA_LASTFM_API_SECRET=…`, one per line. Exported as compile-time env for `option_env!`
     // in lastfm.rs; missing file just means the scrobbler reports "not configured".
     println!("cargo:rerun-if-changed=lastfm.keys");
+    println!("cargo:rerun-if-env-changed=VELUNA_LASTFM_API_KEY");
+    println!("cargo:rerun-if-env-changed=VELUNA_LASTFM_API_SECRET");
+    if let Ok(val) = std::env::var("VELUNA_LASTFM_API_KEY") {
+        if !val.trim().is_empty() {
+            println!("cargo:rustc-env=VELUNA_LASTFM_API_KEY={val}");
+        }
+    }
+    if let Ok(val) = std::env::var("VELUNA_LASTFM_API_SECRET") {
+        if !val.trim().is_empty() {
+            println!("cargo:rustc-env=VELUNA_LASTFM_API_SECRET={val}");
+        }
+    }
     if let Ok(keys) = std::fs::read_to_string("lastfm.keys") {
         for line in keys.lines() {
             if let Some((k, v)) = line.split_once('=') {

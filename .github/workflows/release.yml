@@ -73,6 +73,8 @@ jobs:
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          VELUNA_LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          VELUNA_LASTFM_API_SECRET: ${{ secrets.LASTFM_API_SECRET }}
         run: tauri build
 
       - name: Patch AppImage for multi-distro portability
@@ -177,6 +179,8 @@ jobs:
           RUSTFLAGS: -L native=${{ github.workspace }}\mpv-dev -C link-arg=/NODEFAULTLIB:libcmt.lib
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          VELUNA_LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          VELUNA_LASTFM_API_SECRET: ${{ secrets.LASTFM_API_SECRET }}
         run: |
           tauri build --config src-tauri/tauri.windows.conf.json
 
@@ -241,6 +245,8 @@ jobs:
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          VELUNA_LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          VELUNA_LASTFM_API_SECRET: ${{ secrets.LASTFM_API_SECRET }}
         run: |
           export LIBRARY_PATH="$(brew --prefix)/lib:$LIBRARY_PATH"
           tauri build --config src-tauri/tauri.macos.conf.json --bundles app
