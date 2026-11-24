@@ -1362,13 +1362,178 @@ pub async fn get_playlist_suggestions(
     state: St<'_>,
     playlist_id: String,
     token: Option<String>,
+    seed_video_id: Option<String>,
 ) -> Result<PlaylistSuggestions, String> {
     let client = metadata_client(&state)?;
+    if !playlist_id.starts_with("local_") {
+        if let Ok(res) = state.it.playlist_suggestions(client, &playlist_id, token.as_deref()).await {
+            if !res.items.is_empty() {
+                return Ok(res);
+            }
+        }
+    }
+    if let Some(ref seed) = seed_video_id {
+        let radio_id = format!("RDAMVM{seed}");
+        if let Ok(next) = state.it.next(client, Some(seed), Some(&radio_id)).await {
+            let items: Vec<SongItem> = next.items.into_iter().filter(|i| i.video_id != *seed).collect();
+            if !items.is_empty() {
+                return Ok(PlaylistSuggestions {
+                    refresh: None,
+                    items,
+                });
+            }
+        }
+    }
     state
         .it
         .playlist_suggestions(client, &playlist_id, token.as_deref())
         .await
         .map_err(|e| e.to_string())
+}
+
+/// Enhanced playlist recommendations: seeds directly from the tracks inside the playlist,
+/// querying track radios in parallel and interleaving similar songs while filtering out
+/// existing tracks.
+#[tauri::command]
+pub async fn get_enhanced_recommendations(
+    state: St<'_>,
+    seed_video_ids: Vec<String>,
+    existing_video_ids: Vec<String>,
+    playlist_id: Option<String>,
+) -> Result<Vec<SongItem>, String> {
+    let app = state.inner().clone();
+    let client = metadata_client(&app)?;
+
+    let mut seen_seeds = std::collections::HashSet::new();
+    let valid_seeds: Vec<String> = seed_video_ids
+        .into_iter()
+        .filter(|id| !id.is_empty() && !crate::local::is_local_song(id) && seen_seeds.insert(id.clone()))
+        .collect();
+
+    let existing: std::collections::HashSet<String> = existing_video_ids.into_iter().collect();
+
+    // Pick up to 5 representative seeds from across the playlist
+    let seeds: Vec<String> = if valid_seeds.len() <= 5 {
+        valid_seeds
+    } else {
+        let total = valid_seeds.len();
+        let step = total / 5;
+        (0..5)
+            .map(|i| valid_seeds[(i * step).min(total - 1)].clone())
+            .collect()
+    };
+
+    // Fetch radio recommendations for each seed in parallel
+    let mut futures = Vec::new();
+    for seed in &seeds {
+        let app_clone = app.clone();
+        let s = seed.clone();
+        futures.push(async move {
+            let client = match metadata_client(&app_clone) {
+                Ok(c) => c,
+                Err(_) => return None,
+            };
+            let radio_id = format!("RDAMVM{s}");
+            if let Ok(next) = app_clone.it.next(client, Some(&s), Some(&radio_id)).await {
+                if next.items.len() > 1 {
+                    return Some(next);
+                }
+                if let Some(ref mix) = next.automix_playlist_id {
+                    if let Ok(page) = app_clone.it.next(client, Some(&s), Some(mix)).await {
+                        if page.items.len() > 1 {
+                            return Some(page);
+                        }
+                    }
+                }
+            }
+            if let Ok(bare) = app_clone.it.next(client, Some(&s), None).await {
+                if let Some(ref mix) = bare.automix_playlist_id {
+                    if let Ok(page) = app_clone.it.next(client, Some(&s), Some(mix)).await {
+                        if page.items.len() > 1 {
+                            return Some(page);
+                        }
+                    }
+                }
+                if bare.items.len() > 1 {
+                    return Some(bare);
+                }
+            }
+            None
+        });
+    }
+
+    let results = futures_util::future::join_all(futures).await;
+
+    // Collect batches of similar songs per seed (excluding the seed itself and existing tracks)
+    let mut candidate_lists: Vec<Vec<SongItem>> = Vec::new();
+    for (i, res) in results.into_iter().enumerate() {
+        if let Some(next) = res {
+            let seed_id = &seeds[i];
+            let candidates: Vec<SongItem> = next
+                .items
+                .into_iter()
+                .filter(|item| item.video_id != *seed_id && !existing.contains(&item.video_id))
+                .collect();
+            if !candidates.is_empty() {
+                candidate_lists.push(candidates);
+            }
+        }
+    }
+
+    // Interleave candidate songs from each seed so the recommendations represent the whole playlist
+    let mut final_recs: Vec<SongItem> = Vec::new();
+    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let max_len = candidate_lists.iter().map(|l| l.len()).max().unwrap_or(0);
+
+    for idx in 0..max_len {
+        for list in &candidate_lists {
+            if let Some(item) = list.get(idx) {
+                if !seen.contains(&item.video_id) {
+                    seen.insert(item.video_id.clone());
+                    final_recs.push(item.clone());
+                    if final_recs.len() >= 25 {
+                        return Ok(final_recs);
+                    }
+                }
+            }
+        }
+    }
+
+    // Fallback if individual seeds yielded no non-duplicate tracks: try playlist suggestions / radio
+    if final_recs.is_empty() {
+        if let Some(ref pl_id) = playlist_id {
+            if !pl_id.starts_with("local_") && pl_id != LIKED_MUSIC_ID && pl_id != "on_repeat" {
+                if let Ok(res) = app.it.playlist_suggestions(client, pl_id, None).await {
+                    let filtered: Vec<SongItem> = res
+                        .items
+                        .into_iter()
+                        .filter(|i| !existing.contains(&i.video_id))
+                        .collect();
+                    if !filtered.is_empty() {
+                        return Ok(filtered);
+                    }
+                }
+                let bare = pl_id.strip_prefix("VL").unwrap_or(pl_id);
+                let radio_id = if bare.starts_with("RD") {
+                    bare.to_owned()
+                } else {
+                    format!("RDAMPL{bare}")
+                };
+                if let Ok(next) = app.it.next(client, None, Some(&radio_id)).await {
+                    let filtered: Vec<SongItem> = next
+                        .items
+                        .into_iter()
+                        .filter(|i| !existing.contains(&i.video_id))
+                        .collect();
+                    if !filtered.is_empty() {
+                        return Ok(filtered);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(final_recs)
 }
 
 /// An album page. `id` is the album browseId (`MPRE…`).

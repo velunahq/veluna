@@ -737,8 +737,19 @@ export const setPlaylistSort = (playlistId: string, sort: ServerSort) =>
 export const getPlaylistMore = (token: string) =>
 	invoke<PlaylistContinuation>('get_playlist_more', { token });
 /** `token` is `PlaylistPage.suggestions`, the last batch's `refresh`, or nothing at all. */
-export const getPlaylistSuggestions = (playlistId: string, token?: string) =>
-	invoke<PlaylistSuggestions>('get_playlist_suggestions', { playlistId, token });
+export const getPlaylistSuggestions = (playlistId: string, token?: string, seedVideoId?: string) =>
+	invoke<PlaylistSuggestions>('get_playlist_suggestions', { playlistId, token, seedVideoId });
+/** Enhanced recommendations seeded directly from the songs in the playlist. */
+export const getEnhancedRecommendations = (
+	seedVideoIds: string[],
+	existingVideoIds: string[],
+	playlistId?: string
+) =>
+	invoke<SongItem[]>('get_enhanced_recommendations', {
+		seedVideoIds,
+		existingVideoIds,
+		playlistId: playlistId ?? null
+	});
 /**
  * videoId → the ids of the playlists you own that hold it. Read straight from local SQLite, so it
  * answers instantly and is empty until `syncPlaylistIndex` has filled it in at least once.

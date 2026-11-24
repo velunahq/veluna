@@ -6,6 +6,7 @@
 		MusicNote01Icon,
 		PlayIcon,
 		PlayListAddIcon,
+		SparklesIcon,
 		ThumbsDownIcon,
 		ThumbsUpIcon,
 		VolumeHighIcon
@@ -32,6 +33,7 @@
 		song,
 		index,
 		active = false,
+		enhanced = false,
 		hideThumb = false,
 		compact = false,
 		showPlayCount = false,
@@ -53,6 +55,7 @@
 		/** Position badge when set (playlist/queue); omitted for flat search results. */
 		index?: number;
 		active?: boolean;
+		enhanced?: boolean;
 		/** Hide the leading thumbnail (album track lists show a number, not a cover). */
 		hideThumb?: boolean;
 		/**
@@ -300,6 +303,25 @@
 					<HugeiconsIcon
 						icon={guestAdd ? PlayListAddIcon : PlayIcon}
 						class="invisible absolute inset-0 m-auto h-3.5 w-3.5 {selectable ? '' : 'group-hover:visible'}"
+					/>
+				</span>
+			{:else if enhanced}
+				<span
+					class="relative flex w-5 shrink-0 items-center justify-center text-xs text-emerald-500 dark:text-emerald-400"
+				>
+					<HugeiconsIcon
+						icon={SparklesIcon}
+						class="h-3.5 w-3.5 {active ? 'invisible' : selectable ? '' : 'group-hover:invisible'}"
+					/>
+					{#if active}
+						<HugeiconsIcon
+							icon={VolumeHighIcon}
+							class="absolute inset-0 m-auto h-3.5 w-3.5 text-primary {selectable ? '' : 'group-hover:invisible'}"
+						/>
+					{/if}
+					<HugeiconsIcon
+						icon={guestAdd ? PlayListAddIcon : PlayIcon}
+						class="invisible absolute inset-0 m-auto h-3.5 w-3.5 text-foreground {selectable ? '' : 'group-hover:visible'}"
 					/>
 				</span>
 			{/if}

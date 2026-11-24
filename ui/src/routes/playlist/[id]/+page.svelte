@@ -24,7 +24,10 @@
 		ComputerIcon,
 		SpotifyIcon,
 		Search01Icon,
-		Download01Icon
+		Download01Icon,
+		SparklesIcon,
+		PlusSignIcon,
+		Cancel01Icon
 	} from '@hugeicons/core-free-icons';
 	import { Button } from '$lib/components/ui/button';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
@@ -253,11 +256,102 @@
 		return sortSongs(items, sort, isLiked, desc, myPlays.counts);
 	});
 
+	const origIndexMap = $derived(new Map(sortedItems.map((s, idx) => [s.video_id, idx])));
+
+	// --- Enhanced mode (Spotify-style playlist recommendations) ------------------------------
+	let enhanced = $state(false);
+	let enhancing = $state(false);
+	let enhancedItems = $state<SongItem[]>([]);
+	let dismissedEnhanced = $state(new Set<string>());
+	let addedEnhanced = $state(new Set<string>());
+
+	const enhancedSet = $derived(
+		new Set(
+			enhanced
+				? enhancedItems
+						.filter(
+							(s) =>
+								!dismissedEnhanced.has(s.video_id) &&
+								!addedEnhanced.has(s.video_id) &&
+								!pl?.items.some((orig) => orig.video_id === s.video_id)
+						)
+						.map((s) => s.video_id)
+				: []
+		)
+	);
+
+	const itemsWithEnhanced = $derived.by(() => {
+		const base = sortedItems;
+		if (!enhanced || enhancedItems.length === 0) return base;
+
+		const recs = enhancedItems.filter(
+			(s) =>
+				!dismissedEnhanced.has(s.video_id) &&
+				!addedEnhanced.has(s.video_id) &&
+				!pl?.items.some((orig) => orig.video_id === s.video_id)
+		);
+		if (recs.length === 0) return base;
+
+		// Interleave: 1 recommendation every 3 tracks (Spotify-style)
+		const out: SongItem[] = [];
+		let recIdx = 0;
+		if (base.length === 0) {
+			return recs.slice(0, 10);
+		}
+		for (let i = 0; i < base.length; i++) {
+			out.push(base[i]);
+			if ((i + 1) % 3 === 0 && recIdx < recs.length && recIdx < 15) {
+				out.push(recs[recIdx++]);
+			}
+		}
+		while (recIdx < recs.length && recIdx < 5) {
+			out.push(recs[recIdx++]);
+		}
+		return out;
+	});
+
+	async function toggleEnhance() {
+		if (enhanced) {
+			enhanced = false;
+			toast(t('toasts.enhanced_off'));
+			return;
+		}
+		if (enhancedItems.length === 0) {
+			enhancing = true;
+			try {
+				const existingIds = (pl?.items ?? []).map((s) => s.video_id).filter(Boolean);
+				if (existingIds.length === 0 && (!id || id.startsWith('local_') || isOnRepeat)) {
+					toast(t('toasts.enhanced_no_results'));
+					enhancing = false;
+					return;
+				}
+				// Query recommendations seeded directly from the songs in this playlist
+				const recs = await api.getEnhancedRecommendations(existingIds, existingIds, id);
+				const have = new Set(existingIds);
+				enhancedItems = recs.filter((s) => !have.has(s.video_id));
+				if (enhancedItems.length === 0) {
+					toast(t('toasts.enhanced_no_results'));
+					enhancing = false;
+					return;
+				}
+				enhanced = true;
+				toast.success(t('toasts.enhanced_on'));
+			} catch (e) {
+				toast.error(String(e));
+			} finally {
+				enhancing = false;
+			}
+		} else {
+			enhanced = true;
+			toast.success(t('toasts.enhanced_on'));
+		}
+	}
+
 	// The rows actually on screen: the sorted list, narrowed by the header's filter box. Identical
-	// to `sortedItems` with no query typed.
-	const shown = $derived(filterTracks(sortedItems, applied));
-	const selection = trackSelection(() => sortedItems, () => shown,
-		() => `${auth.epoch}:${id}`, () => !pl?.continuation,
+	// to `itemsWithEnhanced` with no query typed.
+	const shown = $derived(filterTracks(itemsWithEnhanced, applied));
+	const selection = trackSelection(() => itemsWithEnhanced, () => shown,
+		() => `${auth.epoch}:${id}:${enhanced}`, () => !pl?.continuation,
 		// A filter's matches are only the loaded ones, and typing one walks the list anyway, so the
 		// header count would be the wrong number to offer there.
 		() => (filtering ? undefined : headerCount), loadAll);
@@ -442,6 +536,11 @@
 		editing = false;
 		expanded = false;
 		sortOpen = false;
+		enhanced = false;
+		enhancing = false;
+		enhancedItems = [];
+		dismissedEnhanced = new Set();
+		addedEnhanced = new Set();
 		query = '';
 		applied = '';
 		searchOpened = false;
@@ -782,15 +881,15 @@
 		// Navigating while that walk ran would otherwise play the playlist you left for.
 		if (!pl || pid !== id) return;
 		if (!whole) warnPartial('queued');
-		const items = sortedItems;
-		const at = pick ? items.indexOf(pick) : -1;
+		const items = enhanced ? itemsWithEnhanced : sortedItems;
+		const at = pick ? items.findIndex((i) => i.video_id === pick.video_id) : -1;
 		playFrom(
 			asItem(),
 			items,
 			at >= 0 ? at : null,
 			isOnRepeat ? undefined : id,
 			undefined,
-			sorting ? undefined : pl.continuation
+			sorting || enhanced ? undefined : pl.continuation
 		);
 	}
 
@@ -819,7 +918,8 @@
 		const whole = next || (await ready());
 		if (!pl || pid !== id) return;
 		if (!whole) warnPartial('added');
-		enqueue(sortedItems, next, pl.title, sorting ? undefined : pl.continuation);
+		const items = enhanced ? itemsWithEnhanced : sortedItems;
+		enqueue(items, next, pl.title, sorting || enhanced ? undefined : pl.continuation);
 	}
 
 	// Copying a playlist means all of it, not the pages scrolled so far, and nothing walks the rest
@@ -846,11 +946,15 @@
 	// so what order it was handed is irrelevant.
 	function shufflePlay() {
 		if (!pl?.items.length) return;
-		// Real order + shuffle flag — the backend owns shuffling, so the shuffle toggle can
-		// restore the true playlist order and every re-shuffle is fresh. It also mixes each page
-		// it walks into the unplayed tail, so this stays a shuffle of the whole playlist rather
-		// than of the pages that happen to be loaded.
-		playFrom(asItem(), pl.items, null, isOnRepeat ? undefined : id, true, pl.continuation);
+		if (enhanced) {
+			playFrom(asItem(), itemsWithEnhanced, null, isOnRepeat ? undefined : id, true, undefined);
+		} else {
+			// Real order + shuffle flag — the backend owns shuffling, so the shuffle toggle can
+			// restore the true playlist order and every re-shuffle is fresh. It also mixes each page
+			// it walks into the unplayed tail, so this stays a shuffle of the whole playlist rather
+			// than of the pages that happen to be loaded.
+			playFrom(asItem(), pl.items, null, isOnRepeat ? undefined : id, true, pl.continuation);
+		}
 	}
 
 	function openMenu(e: MouseEvent) {
@@ -1096,6 +1200,18 @@
 								{preparing || resorting ? t('common.sorting') : t('player.play')}
 							</Button>
 							<Button
+								variant={enhanced ? 'default' : 'outline'}
+								class="gap-1.5 transition-all {enhanced
+									? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-950/20'
+									: 'text-muted-foreground hover:text-foreground'}"
+								onclick={toggleEnhance}
+								disabled={!pl.items.length || enhancing}
+								title={enhanced ? t('player.enhanced') : t('player.enhance')}
+							>
+								<HugeiconsIcon icon={SparklesIcon} class="h-4 w-4 {enhancing ? 'animate-spin' : ''}" />
+								<span>{enhancing ? t('player.enhancing') : enhanced ? t('player.enhanced') : t('player.enhance')}</span>
+							</Button>
+							<Button
 								variant="ghost"
 								size="icon"
 								aria-label={t('a11y.playlist_options')}
@@ -1160,13 +1276,16 @@
 						<div data-rows style="padding-top:{win.padTop}px;padding-bottom:{win.padBottom}px">
 							{#each shown.slice(win.start, win.end) as item, i (JSON.stringify([item.video_id, win.start + i]))}
 								{@const n = win.start + i}
+								{@const isEnhanced = enhancedSet.has(item.video_id)}
+								{@const rowIdx = isEnhanced ? undefined : (origIndexMap.get(item.video_id) ?? n)}
 								<!-- data-row: what the scroller measures a row's real height from. -->
 								<div data-row>
 									<TrackRow
 										song={item}
 										{selection}
 										selectionKey={selection.visibleKeys[n]}
-										index={n}
+										index={rowIdx}
+										enhanced={isEnhanced}
 										columns={cols}
 										active={item.video_id === nowId}
 										onplay={() => playAll(n)}
@@ -1174,7 +1293,46 @@
 										onRemove={isLiked || item.set_video_id
 											? () => removeTrack(item)
 											: undefined}
-									/>
+									>
+										{#snippet trailing()}
+											{#if isEnhanced}
+												<div class="flex items-center gap-1 pl-1">
+													<button
+														class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500 hover:text-white dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white transition"
+														title={isLiked ? t('player.save_to_liked') : t('player.add_to_playlist')}
+														onclick={async (e) => {
+															e.stopPropagation();
+															if (isLiked) {
+																toggleRating(item.video_id, 'LIKE');
+																addedEnhanced = new Set([...addedEnhanced, item.video_id]);
+																toast.success(t('toasts.liked'));
+															} else if (editable) {
+																const ok = await addSuggestion(item);
+																if (ok) {
+																	addedEnhanced = new Set([...addedEnhanced, item.video_id]);
+																	toast.success(t('toasts.playlist_updated'));
+																}
+															} else {
+																openAddToPlaylist(item);
+															}
+														}}
+													>
+														<HugeiconsIcon icon={PlusSignIcon} class="h-4 w-4" />
+													</button>
+													<button
+														class="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/15 hover:text-destructive transition"
+														title={t('player.remove_recommendation')}
+														onclick={(e) => {
+															e.stopPropagation();
+															dismissedEnhanced = new Set([...dismissedEnhanced, item.video_id]);
+														}}
+													>
+														<HugeiconsIcon icon={Cancel01Icon} class="h-3.5 w-3.5" />
+													</button>
+												</div>
+											{/if}
+										{/snippet}
+									</TrackRow>
 								</div>
 							{/each}
 						</div>
